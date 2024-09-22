@@ -9,51 +9,76 @@ from data_chunk import run_chunk
 from creat_graph import creat_metagraph
 from summerize import process_chunks
 from retrieve import seq_ret
-from utils import *
-from nano_graphrag import GraphRAG, QueryParam
+
+# from utils import *
+from utils import str_uuid, link_context, merge_similar_nodes, get_response
+
+# from .nano.nano_graphrag import GraphRAG, QueryParam
 
 # %% set up parser
 parser = argparse.ArgumentParser()
-parser.add_argument('-simple', type=bool, default='False')
-parser.add_argument('-construct_graph', type=bool, default='False')
-parser.add_argument('-inference', type=bool, default='False')
-parser.add_argument('-grained_chunk', type=bool, default='False')
-parser.add_argument('-trinity', type=bool, default='False')
-parser.add_argument('-trinity_gid1', type=str)
-parser.add_argument('-trinity_gid2', type=str)
-parser.add_argument('-ingraphmerge', type=bool, default='False')
-parser.add_argument('-crossgraphmerge', type=bool, default='False')
-parser.add_argument('-dataset', type=str, default='mimic_ex')
-parser.add_argument('-data_path', type=str, default='./dataset_test')
-parser.add_argument('-test_data_path', type=str, default='./dataset_ex/report_0.txt')
+parser.add_argument("-simple", type=bool, default="False")
+parser.add_argument("-construct_graph", type=bool, default="False")
+parser.add_argument("-inference", type=bool, default="False")
+parser.add_argument("-grained_chunk", type=bool, default="False")
+parser.add_argument("-trinity", type=bool, default="False")
+parser.add_argument("-trinity_gid1", type=str)
+parser.add_argument("-trinity_gid2", type=str)
+parser.add_argument("-ingraphmerge", type=bool, default="False")
+parser.add_argument("-crossgraphmerge", type=bool, default="False")
+parser.add_argument("-dataset", type=str, default="mimic_ex")
+parser.add_argument("-data_path", type=str, default="./dataset_test")
+parser.add_argument("-test_data_path", type=str, default="./dataset_ex/report_0.txt")
 args = parser.parse_args()
-
+print("Med Graph RAG", args)
 if args.simple:
-    graph_func = GraphRAG(working_dir="./nanotest")
+    # graph_func = GraphRAG(working_dir="./nanotest")
 
-    with open("./dataset_ex/report_0.txt") as f:
-        graph_func.insert(f.read())
+    # with open("./dataset_ex/report_0.txt") as f:
+    #     graph_func.insert(f.read())
 
     # Perform local graphrag search (I think is better and more scalable one)
-    print(graph_func.query("What is the main symptom of the patient?", param=QueryParam(mode="local")))
+    print(
+        # graph_func.query(
+        #     "What is the main symptom of the patient?", param=QueryParam(mode="local")
+        # )
+    )
 
 else:
+    print("Med Graph RAG | Neo4j")
+    # Check NEO4J_URL
+    try:
+        url = os.getenv("NEO4J_URI")
+        if not url:
+            raise ValueError("NEO4J_URI is not set.")
+    except ValueError as e:
+        raise SystemExit(f"Error: {e}")
 
-    url=os.getenv("NEO4J_URL")
-    username=os.getenv("NEO4J_USERNAME")
-    password=os.getenv("NEO4J_PASSWORD")
+    # Check NEO4J_PASSWORD
+    try:
+        password = os.getenv("NEO4J_PASSWORD")
+        if not password:
+            raise ValueError("NEO4J_PASSWORD is not set.")
+    except ValueError as e:
+        raise SystemExit(f"Error: {e}")
 
     # Set Neo4j instance
     n4j = Neo4jGraph(
         url=url,
-        username=username,             # Default username
-        password=password     # Replace 'yourpassword' with your actual password
+        username="neo4j",  # Default username
+        password=password,  # Replace 'yourpassword' with your actual password
     )
 
-    if args.construct_graph: 
-        if args.dataset == 'mimic_ex':
-            files = [file for file in os.listdir(args.data_path) if os.path.isfile(os.path.join(args.data_path, file))]
-            
+    if args.construct_graph:
+        print("Med Graph RAG | construct_graph")
+        if args.dataset == "mimic_ex":
+            print("Med Graph RAG | mimic_ex")
+            files = [
+                file
+                for file in os.listdir(args.data_path)
+                if os.path.isfile(os.path.join(args.data_path, file))
+            ]
+
             # Read and print the contents of each file
             for file_name in files:
                 file_path = os.path.join(args.data_path, file_name)

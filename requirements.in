@@ -1,0 +1,13 @@
+uvicorn[standard]
+gunicorn
+fastapi[all]
+pydantic>=2.0.0
+pandas
+colorlog
+# graphrag==0.3.4
+tiktoken
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+langchainhub

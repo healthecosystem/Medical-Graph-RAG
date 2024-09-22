@@ -10,7 +10,6 @@ from utils import *
 
 
 def creat_metagraph(args, content, gid, n4j):
-
     # Set instance
     uio = UnstructuredIO()
     kg_agent = KnowledgeGraphAgent()
@@ -35,4 +34,3 @@ def creat_metagraph(args, content, gid, n4j):
         merge_similar_nodes(n4j, gid)
     add_sum(n4j, whole_chunk, gid)
     return n4j
-
